@@ -52,9 +52,6 @@ static int mpu6050_set_enable(struct iio_dev *indio_dev, bool enable)
 			test_bit(SCAN_GYRO_Z,
 				 indio_dev->active_scan_mask);
 
-		if (ret)
-			return ret;
-
 		return mpu6050_prepare_fifo(st, true);
 	}
 

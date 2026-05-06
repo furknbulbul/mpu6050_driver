@@ -419,12 +419,7 @@ static int mpu6050_probe(struct i2c_client *client)
 	st->reg = &mpu6050_reg;
 	i2c_set_clientdata(client, indio_dev);
 
-	/* Default: 100 Hz, accel + gyro both enabled and FIFO-routed */
-	st->config.sample_rate_div   = 9;   /* 1000 / (9+1) = 100 Hz */
-	st->config.accel_fifo_enable = 1;
-	st->config.gyro_fifo_enable  = 1;
-	st->config.accel_en          = 1;
-	st->config.gyro_en           = 1;
+	st->config = chip_config;
 
 	ret = mpu6050_chip_init(st);
 	if (ret) {
@@ -440,9 +435,11 @@ static int mpu6050_probe(struct i2c_client *client)
 	indio_dev->modes        = INDIO_BUFFER_TRIGGERED | INDIO_DIRECT_MODE;
 	indio_dev->available_scan_masks = scan_masks;
 
+
 	ret = devm_iio_triggered_buffer_setup(&client->dev, indio_dev,
 					      iio_pollfunc_store_time,
 					      mpu6050_read_fifo, NULL);
+	
 	if (ret)
 		return ret;
 

@@ -43,6 +43,8 @@ irqreturn_t mpu6050_read_fifo(int irq, void *p)
 	size_t nb_samples, i;
 	int  ret;
 
+	pr_info("in read fifo\n");
+
 	mutex_lock(&st->lock);
 
 	/* ------------------------------------------------------------ */
@@ -64,9 +66,10 @@ irqreturn_t mpu6050_read_fifo(int irq, void *p)
 		goto end_session;
 
 	fifo_count = (u16)fifo_count_buf[0] << 8 | fifo_count_buf[1];
+	pr_info("fifo count: %d\n", fifo_count);
 
 	/* Handle overflow: reset and bail */
-	if (fifo_count >= FIFO_SIZE - 3 * bytes_per_datum) {
+	if (fifo_count >= FIFO_SIZE - bytes_per_datum) {
 		dev_warn(&st->client->dev, "FIFO overflow – resetting\n");
 		mpu6050_prepare_fifo(st, false);
 		mpu6050_prepare_fifo(st, true);
