@@ -149,8 +149,7 @@ int mpu6050_prepare_fifo(struct mpu6050_state *st, bool enable)
 		if (ret)
 			return ret;
 
-		return mpu6050_write_reg(st, st->reg->INT_ENABLE,
-					 BIT_DATA_RDY_EN);
+		return mpu6050_write_reg(st, st->reg->INT_ENABLE, BIT_DATA_RDY_EN);
 	}
 
 	/* Disable path */
@@ -217,14 +216,7 @@ int mpu6050_chip_init(struct mpu6050_state *st)
 		return ret;
 
 	/* INT pin: active-high, push-pull, clear on any read */
-	ret = mpu6050_write_reg(st, st->reg->INT_PIN_CFG, INT_RD_CLEAR);
-	if (ret)
-		return ret;
-	ret = mpu6050_write_reg(st, st->reg->INT_PIN_CFG, BIT_INT_LEVEL);
-	if (ret)
-		return ret;
-
-	ret = mpu6050_write_reg(st, st->reg->INT_ENABLE, BIT_DATA_RDY_INT);
+	ret = mpu6050_write_reg(st, st->reg->INT_PIN_CFG, INT_RD_CLEAR | BIT_LATCH_INT_EN);
 	if (ret)
 		return ret;
 	
@@ -272,6 +264,7 @@ int mpu6050_chip_init(struct mpu6050_state *st)
 }
 
 static const struct iio_chan_spec mpu6050_channels[] = {
+	IIO_CHAN_SOFT_TIMESTAMP(SCAN_TIMESTAMP),
 	ACCEL_CHAN(X, SCAN_ACCEL_X),
 	ACCEL_CHAN(Y, SCAN_ACCEL_Y),
 	ACCEL_CHAN(Z, SCAN_ACCEL_Z),
@@ -437,7 +430,7 @@ static int mpu6050_probe(struct i2c_client *client)
 
 
 	ret = devm_iio_triggered_buffer_setup(&client->dev, indio_dev,
-					      iio_pollfunc_store_time,
+					      NULL,
 					      mpu6050_read_fifo, NULL);
 	
 	if (ret)
@@ -457,8 +450,8 @@ static int mpu6050_probe(struct i2c_client *client)
 	}
 
 	pm_runtime_enable(&client->dev);
-	pm_runtime_set_autosuspend_delay(&client->dev, 2000);
-	pm_runtime_use_autosuspend(&client->dev);
+	//pm_runtime_set_autosuspend_delay(&client->dev, 2000);
+	//pm_runtime_use_autosuspend(&client->dev);
 
 	ret = devm_iio_device_register(&client->dev, indio_dev);
 	if (ret) {

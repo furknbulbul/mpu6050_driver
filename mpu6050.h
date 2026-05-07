@@ -45,19 +45,21 @@
 
 #define BIT_INT_LEVEL           BIT(7)  /* 1 = active-low */
 #define BIT_INT_OPEN            BIT(6)  /* 1 = open-drain */
+#define BIT_LATCH_INT_EN        BIT(5)
 
 #define BIT_FIFO_OFLOW_EN       BIT(4)
 #define BIT_DATA_RDY_EN         BIT(0)
 
 #define BIT_FIFO_OFLOW_INT      BIT(4)
-#define BIT_DATA_RDY_INT        BIT(0)
+
 
 
 /* Sensor data output registers */
 
 
-#define BYTES_PER_3AXIS 1
-#define FIFO_SIZE 128
+#define BYTES_PER_3AXIS 6
+#define FIFO_SIZE 1024
+
 
 
 #define BIT_XG_FIFO_EN          BIT(6) 

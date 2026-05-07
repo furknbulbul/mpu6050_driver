@@ -101,9 +101,12 @@ irqreturn_t mpu6050_read_fifo(int irq, void *p)
 		 * timestamp captured in the hard-IRQ handler
 		 * (st->it_timestamp) after the sensor data.
 		 */
-		iio_push_to_buffers_with_timestamp(indio_dev,
-						   st->data,
-						   st->it_timestamp);
+			iio_push_to_buffers_with_timestamp(indio_dev,
+							st->data,
+							st->it_timestamp);
+
+		pr_info("pushing sample %zu/%zu to buffer\n", i + 1, nb_samples);
+		
 	}
 
 end_session:

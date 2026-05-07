@@ -33,6 +33,7 @@ static int mpu6050_set_enable(struct iio_dev *indio_dev, bool enable)
 {
 	struct mpu6050_state *st = iio_priv(indio_dev);
 	int ret;
+	pr_info("mpu6050_set_enable: %s\n", enable ? "enable" : "disable");
 
 	if (enable) {
 		/* Determine which sensors are needed from the scan mask */
@@ -52,15 +53,22 @@ static int mpu6050_set_enable(struct iio_dev *indio_dev, bool enable)
 			test_bit(SCAN_GYRO_Z,
 				 indio_dev->active_scan_mask);
 
-		return mpu6050_prepare_fifo(st, true);
+		ret = mpu6050_prepare_fifo(st, true);
+		pr_info("FIFO enabled: accel %s, gyro %s\n",
+			st->config.accel_fifo_enable ? "ON" : "OFF",
+			st->config.gyro_fifo_enable  ? "ON" : "OFF");
+		if (ret)
+			return ret;
+		return 0;
 	}
+
+	pr_info("disabling FIFO and interrupts\n");
 
 	/* --- Disable path --- */
 	ret = mpu6050_prepare_fifo(st, false);
 	if (ret)
 		return ret;
 
-	/* Standby all engines (saves power) */
 	return ret;
 }
 
@@ -126,11 +134,18 @@ static irqreturn_t mpu6050_irq_handler(int irq, void *dev_id)
 		return IRQ_HANDLED;
 	}
 
-	if (int_status & BIT_DATA_RDY_INT) {
+	if (int_status & BIT_DATA_RDY_EN) {
 		/* Pass the pre-captured timestamp to the poll function */
 		pr_info("data ready, trigger poll");
 		indio_dev->pollfunc->timestamp = st->it_timestamp;
 		iio_trigger_poll_nested(st->trig);
+	}
+
+	if (int_status & BIT_FIFO_OFLOW_INT) {
+		dev_warn(&st->client->dev, "FIFO overflow detected\n");
+		/* Reset FIFO to clear overflow and resume data capture */
+		mpu6050_prepare_fifo(st, false);
+		mpu6050_prepare_fifo(st, true);
 	}
 
 	return IRQ_HANDLED;
@@ -151,6 +166,8 @@ int mpu6050_probe_trigger(struct iio_dev *indio_dev, int irq_type)
 {
 	struct mpu6050_state *st = iio_priv(indio_dev);
 	int ret;
+
+	pr_info("probing trigger with IRQ type 0x%x\n", irq_type);
 
 	st->trig = devm_iio_trigger_alloc(&indio_dev->dev,
 					  "%s-dev%d",
