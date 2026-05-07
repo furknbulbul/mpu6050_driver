@@ -179,6 +179,7 @@ int mpu6050_probe_trigger(struct iio_dev *indio_dev, int irq_type)
 		return -ENOMEM;
 
 	irq_type |= IRQF_ONESHOT;
+	//irq_type |= IRQ_TRIGGER_RISING; /* MPU-6050 INT pin is active-high */
 
 	pr_info("mpu6050: Kayit edilen IRQ numarasi: %d\n", st->irq);
 
