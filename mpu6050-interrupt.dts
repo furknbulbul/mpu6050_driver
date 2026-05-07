@@ -1,0 +1,42 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835";
+
+    /* 1. Aşama: GPIO Pin Konfigürasyonu (Pinctrl) */
+    fragment@0 {
+        target = <&gpio>;
+        __overlay__ {
+            mpu6050_pins: mpu6050_pins {
+                brcm,pins = <24>;     /* GPIO 24 */
+                brcm,function = <0>;  /* 0: Input */
+                brcm,pull = <1>;      /* 1: Pull-Down (Active High sinyal beklediğimiz için) */
+            };
+        };
+    };
+
+    /* 2. Aşama: I2C Cihaz Tanımlaması */
+    fragment@1 {
+        target = <&i2c1>;
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            mpu6050: mpu6050@68 {
+                compatible = "invensense,mpu6050";
+                reg = <0x68>;
+                
+                /* Pin Konfigürasyonunu Bağla */
+                pinctrl-names = "default";
+                pinctrl-0 = <&mpu6050_pins>;
+
+                /* Kesme (Interrupt) Ayarları */
+                interrupt-parent = <&gpio>;
+                interrupts = <24 1>; /* 24: Pin, 1: Rising Edge */
+                
+                status = "okay";
+            };
+        };
+    };
+};

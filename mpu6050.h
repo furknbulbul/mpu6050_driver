@@ -72,7 +72,10 @@
 #define BIT_CYCLE               BIT(5)
 #define CLKSEL_MASK             0x07
 #define CLKSEL_INTERNAL         0x00
-#define CLKSEL_PLL_XGYRO        0x01   /* recommended */
+#define BIT_CLKSEL_0        BIT(0)   /* recommended */
+#define BIT_CLKSEL_1        BIT(1)
+#define BIT_CLKSEL_2        BIT(2)
+#define BIT_TEMP_DIS        BIT(3)
 
 #define WHOAMI_VALUE            0x68
 

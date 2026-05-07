@@ -191,7 +191,7 @@ int mpu6050_chip_init(struct mpu6050_state *st)
 	}
 
 	/* Wake up and use PLL clock for better stability */
-	ret = mpu6050_write_reg(st, st->reg->PWR_MGMT_1, CLKSEL_PLL_XGYRO);
+	ret = mpu6050_write_reg(st, st->reg->PWR_MGMT_1, BIT_CLKSEL_0 | BIT_TEMP_DIS);
 	if (ret)
 		return ret;
 
@@ -215,8 +215,8 @@ int mpu6050_chip_init(struct mpu6050_state *st)
 	if (ret)
 		return ret;
 
-	/* INT pin: active-high, push-pull, clear on any read */
-	ret = mpu6050_write_reg(st, st->reg->INT_PIN_CFG, INT_RD_CLEAR | BIT_LATCH_INT_EN);
+	/* INT pin: active-high, push-pull, */
+	ret = mpu6050_write_reg(st, st->reg->INT_PIN_CFG, BIT_LATCH_INT_EN);
 	if (ret)
 		return ret;
 	
@@ -496,7 +496,7 @@ static struct i2c_driver mpu6050_driver = {
 	.driver   = {
 		.name           = "mpu6050",
 		.of_match_table = mpu6050_of_match,
-		.pm             = pm_ptr(&mpu6050_pm_ops),
+		//.pm             = pm_ptr(&mpu6050_pm_ops),
 	},
 };
 module_i2c_driver(mpu6050_driver);

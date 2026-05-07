@@ -108,6 +108,8 @@ static irqreturn_t mpu6050_irq_timestamp(int irq, void *dev_id)
 	struct iio_dev       *indio_dev = dev_id;
 	struct mpu6050_state *st        = iio_priv(indio_dev);
 
+	pr_info("mpu6050: irq timestamp handler called.\n");
+
 	st->it_timestamp = iio_get_time_ns(indio_dev);
 	return IRQ_WAKE_THREAD;
 }
@@ -177,6 +179,8 @@ int mpu6050_probe_trigger(struct iio_dev *indio_dev, int irq_type)
 		return -ENOMEM;
 
 	irq_type |= IRQF_ONESHOT;
+
+	pr_info("mpu6050: Kayit edilen IRQ numarasi: %d\n", st->irq);
 
 	ret = devm_request_threaded_irq(&indio_dev->dev,
 					st->irq,
